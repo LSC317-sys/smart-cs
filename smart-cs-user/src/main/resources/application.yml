@@ -1,0 +1,29 @@
+server:
+  port: 8083
+
+spring:
+  cloud:
+    nacos:
+      config:
+        import-check:
+          enabled: false
+  datasource:
+    url: jdbc:mysql://localhost:3306/smart_cs_user?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    username: root
+    password: liu317228
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+# JWT 配置
+jwt:
+  secret: your-jwt-secret-key-here
+  expiration: 86400000
+
+# 管理员注册邀请码
+admin:
+  invitation-code: SMARTCS_ADMIN_SECRET_2026
+
+logging.level.com.smartcs: debug

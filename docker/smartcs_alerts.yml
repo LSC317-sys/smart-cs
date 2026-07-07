@@ -1,0 +1,63 @@
+# SmartCS 告警规则
+# 依据：设计文档 v3.0 第 6.3 章
+# 生成时间：2026-05-23
+
+groups:
+  - name: smartcs-alerts
+    rules:
+      # ========== 主机告警 ==========
+      - alert: HighCpuUsage
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "CPU 使用率过高（{{ $value }}%）"
+          description: "实例 {{ $labels.instance }} CPU 使用率超过 80%"
+
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 90
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "内存使用率过高（{{ $value }}%）"
+          description: "实例 {{ $labels.instance }} 内存使用率超过 90%"
+
+      - alert: DiskSpaceLow
+        expr: (node_filesystem_avail_bytes{fstype!="tmpfs"} / node_filesystem_size_bytes{fstype!="tmpfs"}) * 100 < 15
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "磁盘空间不足（剩余 {{ $value }}%）"
+          description: "实例 {{ $labels.instance }} 磁盘 {{ $labels.mountpoint }} 剩余空间不足 15%"
+
+      # ========== JVM 告警 ==========
+      - alert: JvmHeapUsageHigh
+        expr: jvm_memory_used_bytes{area="heap"} / jvm_memory_max_bytes{area="heap"} * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "JVM 堆内存使用率过高（{{ $value }}%）"
+          description: "服务 {{ $labels.job }} JVM 堆内存使用率超过 85%"
+
+      # ========== 业务告警 ==========
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.99, rate(http_server_requests_seconds_bucket[5m])) > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "响应时间过长（P99 = {{ $value }}s）"
+          description: "服务 {{ $labels.job }} P99 响应时间超过 5 秒"
+
+      - alert: HighErrorRate
+        expr: rate(http_server_requests_seconds_count{status=~"5.."}[5m]) / rate(http_server_requests_seconds_count[5m]) * 100 > 5
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "错误率过高（{{ $value }}%）"
+          description: "服务 {{ $labels.job }} 5xx 错误率超过 5%"

@@ -1,0 +1,56 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+alerting:
+  alertmanagers: []
+
+rule_files: []
+
+scrape_configs:
+  # Gateway
+  - job_name: 'gateway'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['gateway:8080']
+        labels:
+          service: gateway
+
+  # Chat Service
+  - job_name: 'chat'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['chat:8081']
+        labels:
+          service: chat
+
+  # Knowledge Service
+  - job_name: 'knowledge'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['knowledge:8082']
+        labels:
+          service: knowledge
+
+  # User Service
+  - job_name: 'user'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['user:8083']
+        labels:
+          service: user
+
+  # Admin Service
+  - job_name: 'admin'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['admin:8084']
+        labels:
+          service: admin
+
+  # Node Exporter (服务器资源)
+  - job_name: 'node'
+    static_configs:
+      - targets: ['node-exporter:9100']
+        labels:
+          service: node

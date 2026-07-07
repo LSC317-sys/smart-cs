@@ -1,0 +1,52 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: smart-cs-chat
+
+  datasource:
+    url: jdbc:mysql://mysql:3306/smart_cs?useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+    username: root
+    password: ${MYSQL_ROOT_PASSWORD:liu317228}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  data:
+    redis:
+      host: redis
+      port: 6379
+
+  cloud:
+    nacos:
+      discovery:
+        enabled: false
+
+  mvc:
+    async:
+      request-timeout: 60000
+
+# SiliconFlow API（环境变量注入）
+siliconflow:
+  embedding-api-key: ${SILICONFLOW_API_KEY}
+  embedding-base-url: https://api.siliconflow.cn/v1
+  embedding-model: BAAI/bge-m3
+  chat-api-key: ${SILICONFLOW_API_KEY}
+  chat-base-url: https://api.siliconflow.cn/v1
+  chat-model: Qwen/Qwen2.5-7B-Instruct
+
+logging:
+  level:
+    com.smartcs: info
+
+# Actuator 暴露 Prometheus 指标端点
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    tags:
+      application: ${spring.application.name}

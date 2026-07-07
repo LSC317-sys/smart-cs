@@ -1,0 +1,53 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: smart-cs-gateway
+  main:
+    web-application-type: reactive
+
+  datasource:
+    url: jdbc:mysql://mysql:3306/smart_cs?useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+    username: root
+    password: ${MYSQL_ROOT_PASSWORD:liu317228}
+
+  data:
+    redis:
+      host: redis
+      port: 6379
+
+# Docker 环境下使用容器名作为服务地址
+chat:
+  service:
+    url: http://chat:8081
+
+knowledge:
+  service:
+    url: http://knowledge:8082
+
+user:
+  service:
+    url: http://user:8083
+
+admin:
+  service:
+    url: http://admin:8084
+
+logging:
+  level:
+    root: info
+    com.smartcs: info
+
+# Actuator 暴露 Prometheus 指标端点
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    tags:
+      application: ${spring.application.name}

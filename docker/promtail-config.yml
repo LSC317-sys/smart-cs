@@ -1,0 +1,79 @@
+# Promtail 配置（日志采集）
+# 依据：设计文档 v3.0 第 6.5 章
+# 生成时间：2026-05-23
+
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  # ========== Spring Boot 日志 ==========
+  - job_name: spring-boot-logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: spring-boot
+          __path__: /var/log/smartcs/*.log
+
+    pipeline_stages:
+      # 解析日志级别
+      - regex:
+          expression: '.*(INFO|DEBUG|WARN|ERROR).*'
+
+      - labels:
+          level:
+
+      # 解析时间戳
+      - regex:
+          expression: '^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3})'
+
+      - timestamp:
+          source: time
+          format: "2006-01-02 15:04:05.000"
+
+  # ========== Nginx 日志 ==========
+  - job_name: nginx-logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: nginx
+          __path__: /var/log/nginx/*.log
+
+    pipeline_stages:
+      # 解析 Nginx 访问日志
+      - regex:
+          expression: '^(?P<ip>\S+) - - \[(?P<timestamp>[^\]]+)\] "(?P<method>\S+) (?P<path>\S+) (?P<protocol>\S+)" (?P<status>\d+) (?P<size>\d+) "(?P<referer>[^"]*)" "(?P<user_agent>[^"]*)"'
+
+      - labels:
+          method:
+          status:
+          path:
+
+      - timestamp:
+          source: timestamp
+          format: "02/Jan/2006:15:04:05 -0700"
+
+  # ========== Docker 容器日志 ==========
+  - job_name: docker-logs
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 5s
+
+    pipeline_stages:
+      - docker:
+          expr: '^(?P<level>\w+).*$'
+          attributes:
+            level:
+          source: log
+
+      - labels:
+          container_name:
+          level:

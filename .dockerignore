@@ -1,0 +1,24 @@
+# Git
+.git
+.gitignore
+
+# IDE
+.idea
+*.iml
+.vscode
+
+# Build
+**/target
+**/node_modules
+**/dist
+
+# Logs
+logs/
+*.log
+
+# Docker
+docker/
+
+# Env
+.env
+.env.local
